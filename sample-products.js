@@ -1,3 +1,6 @@
+/* Shared lists: the admin page offers ONLY these choices, so crops and problems always match the advisor. */
+const CROPS=["Maize","Beans","Coffee","Tomatoes","Cassava","Banana","Cattle"];
+const PROBS=["Weeds","Aphids","Armyworm","Whiteflies","Blight","Leaf rust","Ticks","Poor soil fertility"];
 /* Sample products (used until Supabase is connected, and by the admin "Import samples" button) */
 const SAMPLE_PRODUCTS=[
 {id:1,name:"Glyphosate 480 SL",cat:"Herbicides",ai:"Glyphosate",packs:[["1 L",18000],["5 L",80000]],stock:1,crops:["Maize","Cassava","Banana","Coffee"],probs:["Weeds"],rate:3,unit:"L",controls:"Annual and perennial weeds before planting or between rows (directed spray).",dose:"2–4 L/ha in about 200 L water.",method:"Knapsack sprayer with a shield; keep off crop leaves and green stems.",phi:"Keep spray off the crop; follow label",safety:"Harmful if swallowed. Wear gloves, mask, goggles. Keep away from water."},

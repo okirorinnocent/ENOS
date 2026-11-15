@@ -29,8 +29,8 @@
    <input name="price" type="number" min="0" class="field" placeholder="Price from, UGX (optional)">
    <input name="stock_qty" type="number" min="0" class="field" placeholder="Quantity in stock (optional)">
    <label class="flex items-center gap-2"><input type="checkbox" name="in_stock" checked> Show as in stock</label>
-   <input name="crops" class="field" placeholder="Crops it suits (Maize, Beans)">
-   <input name="problems" class="field" placeholder="Problems it solves (Weeds, Aphids)">
+   <fieldset class="md:col-span-2"><legend class="font-semibold">Crops it suits</legend><div id="cropsBox" class="flex flex-wrap gap-x-4 gap-y-1"></div></fieldset>
+   <fieldset class="md:col-span-2"><legend class="font-semibold">Problems it solves</legend><div id="probsBox" class="flex flex-wrap gap-x-4 gap-y-1"></div></fieldset>
    <textarea name="controls" class="field md:col-span-2" rows="2" placeholder="What it controls / is used for"></textarea>
    <input name="dosage" class="field" placeholder="Dosage guide">
    <input name="application" class="field" placeholder="Application method">

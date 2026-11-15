@@ -5,6 +5,10 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const list=v=>(v||"").split(",").map(x=>x.trim()).filter(Boolean);
 function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2600)}
 const F=$("#add");F.category.innerHTML='<option value="">Category *</option>'+CATS.map(c=>`<option>${c}</option>`).join("");
+const box=(id,name,arr)=>$(id).innerHTML=arr.map(v=>`<label class="flex items-center gap-1"><input type="checkbox" name="${name}" value="${v}"> ${v}</label>`).join("");
+box("#cropsBox","crop",CROPS);box("#probsBox","prob",PROBS);
+const picked=n=>[...F.querySelectorAll(`input[name=${n}]:checked`)].map(i=>i.value);
+const setPicked=(n,a)=>F.querySelectorAll(`input[name=${n}]`).forEach(i=>i.checked=(a||[]).some(x=>x.trim().toLowerCase()===i.value.toLowerCase()));
 if(!C.SUPA||!C.KEY){$("#setup").classList.remove("hidden")}
 else{
  const db=supabase.createClient(C.SUPA,C.KEY);let ROWS=[],editing=null;
@@ -29,7 +33,7 @@ else{
   $("#cancel").classList.add("hidden");$("#curimg").classList.add("hidden");$("#imglbl").textContent="Photo (optional)"}
  function edit(id){const p=ROWS.find(x=>x.id==id);editing=p;reset();editing=p;
   F.id.value=p.id;F.name.value=p.name;F.category.value=p.category;F.active_ingredient.value=p.active_ingredient||"";F.packs.value=(p.packs||[]).join(", ");
-  F.price.value=p.price??"";F.stock_qty.value=p.stock_qty??"";F.in_stock.checked=p.in_stock;F.crops.value=(p.crops||[]).join(", ");F.problems.value=(p.problems||[]).join(", ");
+  F.price.value=p.price??"";F.stock_qty.value=p.stock_qty??"";F.in_stock.checked=p.in_stock;setPicked("crop",p.crops);setPicked("prob",p.problems);
   F.controls.value=p.controls||"";F.dosage.value=p.dosage||"";F.application.value=p.application||"";F.pre_harvest.value=p.pre_harvest||"";F.safety.value=p.safety||"";
   F.rate_per_ha.value=p.rate_per_ha??"";F.unit.value=p.unit||"";
   $("#ftitle").textContent="Edit: "+p.name;$("#save").textContent="Save changes";$("#cancel").classList.remove("hidden");
@@ -49,12 +53,14 @@ else{
    if(up.error){$("#ferr").textContent="Photo upload failed: "+up.error.message;btn.disabled=false;return}
    oldPath=imgPath(image_url);image_url=db.storage.from("product-images").getPublicUrl(path).data.publicUrl}
   else if(editing&&$("#rmimg").checked){oldPath=imgPath(image_url);image_url=null}
-  const row={name:v.name.trim(),category:v.category,active_ingredient:v.active_ingredient||null,packs:list(v.packs),price:v.price?+v.price:null,
-   stock_qty:v.stock_qty!==""?+v.stock_qty:null,in_stock:F.in_stock.checked,crops:list(v.crops),problems:list(v.problems),controls:v.controls||null,dosage:v.dosage||null,
+  if(v.price&&+v.price<0||v.stock_qty&&+v.stock_qty<0||v.rate_per_ha&&+v.rate_per_ha<0){$("#ferr").textContent="Price, quantity and rate cannot be negative.";btn.disabled=false;return}
+  if(v.rate_per_ha&&!v.unit){$("#ferr").textContent="Choose a rate unit (L or kg) for the calculator rate.";btn.disabled=false;return}
+  const row={name:v.name.trim().replace(/\s+/g," "),category:v.category,active_ingredient:v.active_ingredient||null,packs:list(v.packs),price:v.price?+v.price:null,
+   stock_qty:v.stock_qty!==""?+v.stock_qty:null,in_stock:F.in_stock.checked,crops:picked("crop"),problems:picked("prob"),controls:v.controls||null,dosage:v.dosage||null,
    application:v.application||null,pre_harvest:v.pre_harvest||null,safety:v.safety||null,rate_per_ha:v.rate_per_ha?+v.rate_per_ha:null,unit:v.unit||null,image_url};
   const q=editing?db.from("products").update(row).eq("id",editing.id):db.from("products").insert(row);
   const{error}=await q;btn.disabled=false;
-  if(error){$("#ferr").textContent="Could not save: "+error.message;return}
+  if(error){$("#ferr").textContent=error.code==="23505"?"A product with this name already exists. Edit that one instead.":"Could not save: "+error.message;return}
   if(oldPath)await db.storage.from("product-images").remove([oldPath]);
   const was=!!editing;reset();toast(was?"Changes saved":"Product saved");refresh()};
 

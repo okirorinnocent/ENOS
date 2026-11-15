@@ -1,7 +1,5 @@
 /* SAMARITAN AGRO-DEALERS: public site logic. Products come from Supabase (see config.js) or fall back to sample-products.js */
 const CATS=["Herbicides","Insecticides","Fungicides","Fertilizers","Seeds","Veterinary","Equipment"];
-const CROPS=["Maize","Beans","Coffee","Tomatoes","Cassava","Banana","Cattle"];
-const PROBS=["Weeds","Aphids","Armyworm","Whiteflies","Blight","Leaf rust","Ticks","Poor soil fertility"];
 const $=s=>document.querySelector(s),C=window.CFG;
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const ugx=n=>"UGX "+Number(n).toLocaleString("en-UG");
@@ -44,7 +42,8 @@ $("#aCrop").innerHTML='<option value="">Choose crop or animal</option>'+CROPS.ma
 $("#aProb").innerHTML='<option value="">Choose problem</option>'+PROBS.map(c=>`<option>${c}</option>`).join("");
 function advise(){const c=$("#aCrop").value,pr=$("#aProb").value,o=$("#aOut");
  if(!c||!pr){o.innerHTML="<p>Pick a crop and a problem to see matching products.</p>";return}
- const m=PRODUCTS.filter(p=>p.crops.includes(c)&&p.probs.includes(pr));
+ const has=(a,x)=>a.some(v=>v.trim().toLowerCase()===x.toLowerCase());
+ const m=PRODUCTS.filter(p=>has(p.crops,c)&&has(p.probs,pr));
  o.innerHTML=m.length?m.map(card).join(""):"<p>No exact match in our catalogue. Message us on WhatsApp and describe what you see.</p>"}
 ["#aCrop","#aProb"].forEach(i=>$(i).addEventListener("change",advise));
 
