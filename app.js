@@ -1,7 +1,7 @@
 /* SAMARITAN AGRO-DEALERS: public site logic. Products come from Supabase (see config.js) or fall back to sample-products.js */
 const CATS=["Herbicides","Insecticides","Fungicides","Fertilizers","Seeds","Veterinary","Equipment"];
 const $=s=>document.querySelector(s),C=window.CFG;
-const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&","<":"<",">":">",'"':""","'":"'"}[c]));
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&","<":"<",">":">","\"":"\"","'":"'"}[c]));
 const ugx=n=>"UGX "+Number(n).toLocaleString("en-UG");
 const wa=t=>`https://wa.me/${C.WA}?text=${encodeURIComponent(t)}`;
 const SUPABASE_STORAGE_HOST = C.SUPA ? new URL(C.SUPA).hostname.replace(/^.*?\./, '') : null;
@@ -19,12 +19,14 @@ const fromRow=r=>({id:r.id,name:r.name,cat:r.category,ai:r.active_ingredient||""
 
 function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
 if(localStorage.dark==="1")document.documentElement.classList.add("dark");
-$("#dark").onclick=()=>{const d=document.documentElement.classList.toggle("dark");localStorage.dark=d?"1":"0"};
+$("#dark").addEventListener("click",()=>{const d=document.documentElement.classList.toggle("dark");localStorage.dark=d?"1":"0"});
 
 /* Catalogue */
 $("#cat").innerHTML='<option value="">All categories</option>'+CATS.map(c=>`<option>${c}</option>`).join("");
 const enq=p=>wa(`Hello ${C.BIZ}, I am interested in ${p.name}. Is it available, and what is the price?`);
-function card(p){return `<article class="card flex flex-col">${p.img?`<img src="${esc(p.img)}" alt="${esc(p.name)}" loading="lazy" class="rounded-xl mb-2 w-full object-cover" style="height:9rem">`:""}
+function card(p){
+  const img = p.img && isValidStorageUrl(p.img) ? p.img : "";
+  return `<article class="card flex flex-col">${img?`<img src="${esc(img)}" alt="${esc(p.name)}" loading="lazy" class="rounded-xl mb-2 w-full object-cover" style="height:9rem">`:""}
 <div class="flex justify-between items-start gap-2"><span class="badge" style="background:var(--sand)">${esc(p.cat)}</span><span class="badge ${p.stock?"in":"out"}">${p.stock?(p.qty!=null&&p.qty>0&&p.qty<=5?"Low stock":"In stock"):"Out of stock"}</span></div>
 <h3 class="font-bold text-lg mt-2">${esc(p.name)}</h3><p class="text-sm" style="color:var(--mute)">${esc(p.ai)}</p>
 ${p.packs.length?`<p class="text-sm mt-1">Pack sizes: ${p.packs.map(esc).join(", ")}</p>`:""}
@@ -38,11 +40,15 @@ function render(){const q=$("#q").value.toLowerCase(),c=$("#cat").value,s=$("#so
 ["#q","#cat","#sort"].forEach(i=>$(i).addEventListener("input",render));
 
 /* Product details */
-function info(id){const p=PRODUCTS.find(x=>x.id==id),d=$("#pm");
- d.innerHTML=`<h3 class="text-xl font-extrabold">${esc(p.name)}</h3><p style="color:var(--mute)">${esc(p.ai)}</p>
- <dl class="mt-3 grid gap-2 text-sm"><div><b>Controls / use:</b> ${esc(p.controls)}</div><div><b>Suits:</b> ${esc(p.crops.join(", ")||"Ask our staff")}</div><div><b>Dosage (guide):</b> ${esc(p.dose)}</div><div><b>How to apply:</b> ${esc(p.method)}</div><div><b>Pre-harvest interval:</b> ${esc(p.phi)}</div></dl>
- <p class="warn mt-3 text-sm"><b>Safety:</b> ${esc(p.safety)} Always read the label.</p>
- <div class="flex gap-2 mt-4"><a class="btn btn-green" href="${enq(p)}" target="_blank" rel="noopener">Enquire on WhatsApp</a><button class="btn btn-out" onclick="this.closest('dialog').close()">Close</button></div>`;d.showModal()}
+function info(id){
+  const p=PRODUCTS.find(x=>x.id==id),d=$("#pm");
+  d.innerHTML=`<h3 class="text-xl font-extrabold">${esc(p.name)}</h3><p style="color:var(--mute)">${esc(p.ai)}</p>
+<dl class="mt-3 grid gap-2 text-sm"><div><b>Controls / use:</b> ${esc(p.controls)}</div><div><b>Suits:</b> ${esc(p.crops.join(", ")||"Ask our staff")}</div><div><b>Dosage (guide):</b> ${esc(p.dose)}</div><div><b>How to apply:</b> ${esc(p.method)}</div><div><b>Pre-harvest interval:</b> ${esc(p.phi)}</div></dl>
+<p class="warn mt-3 text-sm"><b>Safety:</b> ${esc(p.safety)} Always read the label.</p>
+<div class="flex gap-2 mt-4"><a class="btn btn-green" href="${enq(p)}" target="_blank" rel="noopener">Enquire on WhatsApp</a><button class="btn btn-out" data-close>Close</button></div>`;
+  d.showModal();
+  d.querySelector("[data-close]").addEventListener("click",()=>d.close());
+}
 
 /* Advisor */
 $("#aCrop").innerHTML='<option value="">Choose crop or animal</option>'+CROPS.map(c=>`<option>${c}</option>`).join("");
@@ -70,9 +76,25 @@ $("#cf").addEventListener("submit",e=>{e.preventDefault();const n=$("#cfN").valu
 $("#waHero").href=wa("Hello "+C.BIZ);
 
 /* Load products: Supabase REST (public read) -> fallback to samples */
-async function load(){PRODUCTS=[];
- if(!(C.SUPA&&C.KEY))PRODUCTS=SAMPLE_PRODUCTS.map(fromSample);
- else{try{const r=await fetch(`${C.SUPA}/rest/v1/products?select=*&order=name`,{headers:{apikey:C.KEY,Authorization:"Bearer "+C.KEY}});
-  if(!r.ok)throw 0;PRODUCTS=(await r.json()).map(fromRow)}catch(e){toast("Could not load products. Please refresh or WhatsApp us.")}}
- render();advise();fillCalc()}
+async function load(){
+  PRODUCTS=[];
+  if(!(C.SUPA&&C.KEY)){
+    PRODUCTS=SAMPLE_PRODUCTS.map(fromSample);
+  }else{
+    try{
+      const controller=new AbortController();
+      const timeout=setTimeout(()=>controller.abort(),8000);
+      const r=await fetch(`${C.SUPA}/rest/v1/products?select=*&order=name`,{
+        headers:{apikey:C.KEY,Authorization:"Bearer "+C.KEY},
+        signal:controller.signal
+      });
+      clearTimeout(timeout);
+      if(!r.ok)throw 0;
+      PRODUCTS=(await r.json()).map(fromRow)
+    }catch(e){
+      toast("Could not load products. Please refresh or WhatsApp us.")
+    }
+  }
+  render();advise();fillCalc()
+}
 load();

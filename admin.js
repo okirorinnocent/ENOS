@@ -4,11 +4,11 @@ const fail=m=>{const s=$("#setup");s.textContent=m;s.classList.remove("hidden")}
 addEventListener("error",e=>{if(!/admin\.js/.test(e.filename||""))return;fail("Admin page error: "+(e.message||"script failed to load")+". Press F12 > Console for details.")});
 if(!window.supabase)fail("Could not load the Supabase library. Check your internet, turn off any ad-blocker for this site, then reload (Ctrl+Shift+R).");
 const CATS=["Herbicides","Insecticides","Fungicides","Fertilizers","Seeds","Veterinary","Equipment"];
-const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&","<":"<",">":">","\"":"\"","'":"'"}[c]));
 const list=v=>(v||"").split(",").map(x=>x.trim()).filter(Boolean);
 function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2600)}
 const F=$("#add");F.category.innerHTML='<option value="">Category *</option>'+CATS.map(c=>`<option>${c}</option>`).join("");
-const box=(id,name,arr)=>$(id).innerHTML=arr.map(v=>`<label class="flex items-center gap-1"><input type="checkbox" name="${name}" value="${v}"> ${v}</label>`).join("");
+const box=(id,name,arr)=>$(id).innerHTML=arr.map(v=>`<label class="flex items-center gap-1"><input type="checkbox" name="${name}" value="${esc(v)}"> ${esc(v)}</label>`).join("");
 box("#cropsBox","crop",CROPS);box("#probsBox","prob",PROBS);
 const picked=n=>[...F.querySelectorAll(`input[name=${n}]:checked`)].map(i=>i.value);
 const setPicked=(n,a)=>F.querySelectorAll(`input[name=${n}]`).forEach(i=>i.checked=(a||[]).some(x=>x.trim().toLowerCase()===i.value.toLowerCase()));
@@ -45,7 +45,14 @@ function setupTurnstile(){
    retryBtn.onclick=()=>{captchaToken="";$("#lerr").textContent="";window.turnstile.reset(turnstileWidget)};
    box.parentNode.insertBefore(retryBtn,box.nextSibling);
   }
- const imgPath=u=>{const m=(u||"").split("/product-images/")[1];return m?decodeURIComponent(m):null};
+ const SUPABASE_STORAGE_HOST = C.SUPA ? new URL(C.SUPA).hostname.replace(/^.*?\./, '') : null;
+const isValidStorageUrl = u => {
+  try {
+    const url = new URL(u);
+    return url.protocol === "https:" && url.hostname.endsWith(SUPABASE_STORAGE_HOST || "");
+  } catch { return false; }
+};
+const imgPath=u=>{const m=(u||"").split("/product-images/")[1];return m?decodeURIComponent(m):null};
  async function isAdmin(){const{data:{user}}=await db.auth.getUser();if(!user)return false;
   const{data,error}=await db.from("admins").select("user_id").eq("user_id",user.id).maybeSingle();
   if(error)window.adminErr=error.message;return !!data}
@@ -55,7 +62,7 @@ function setupTurnstile(){
  async function refresh(){const{data,error}=await db.from("products").select("*").order("name");
   if(error){toast("Could not load products");return}
   ROWS=data;$("#n").textContent=data.length;
-  $("#list").innerHTML=data.map(p=>`<div class="card flex flex-wrap items-center gap-2">${p.image_url?`<img src="${esc(p.image_url)}" alt="" class="rounded" style="width:3rem;height:3rem;object-fit:cover">`:""}
+  $("#list").innerHTML=data.map(p=>`<div class="card flex flex-wrap items-center gap-2">${p.image_url&&isValidStorageUrl(p.image_url)?`<img src="${esc(p.image_url)}" alt="" class="rounded" style="width:3rem;height:3rem;object-fit:cover">`:""}
    <div class="flex-1" style="min-width:10rem"><b>${esc(p.name)}</b><br><span class="text-sm" style="color:var(--mute)">${esc(p.category)}${p.stock_qty!=null?" · Qty: "+p.stock_qty:""}</span></div>
    <button class="btn btn-out" data-addstock="${p.id}">+ Add stock</button>
    <button class="btn btn-out" data-stock="${p.id}">${p.in_stock?"In stock":"Out of stock"}</button>
@@ -72,16 +79,16 @@ function setupTurnstile(){
   $("#ftitle").textContent="Edit: "+p.name;$("#save").textContent="Save changes";$("#cancel").classList.remove("hidden");
   if(p.image_url){$("#curpic").src=p.image_url;$("#curimg").classList.remove("hidden");$("#rmimg").checked=false;$("#imglbl").textContent="Replace photo (optional)"}
   F.scrollIntoView({behavior:"smooth"})}
- $("#cancel").onclick=reset;
+$("#cancel").addEventListener("click",reset);
 
- $("#login").onsubmit=async e=>{e.preventDefault();$("#lerr").textContent="";
+$("#login").addEventListener("submit",async e=>{e.preventDefault();$("#lerr").textContent="";
   if(C.TURNSTILE_SITE_KEY&&!captchaToken){$("#lerr").textContent="Complete the security check first.";return}
   const options=C.TURNSTILE_SITE_KEY?{captchaToken}:undefined;
   const{error}=await db.auth.signInWithPassword({email:$("#em").value,password:$("#pw").value,...(options?{options}:{})});
-  if(error){$("#lerr").textContent="Wrong email or password.";captchaToken="";if(turnstileWidget!==null)window.turnstile.reset(turnstileWidget);return}show()};
- $("#out").onclick=async()=>{await db.auth.signOut();show()};
+  if(error){$("#lerr").textContent="Wrong email or password.";captchaToken="";if(turnstileWidget!==null)window.turnstile.reset(turnstileWidget);return}show()});
+$("#out").addEventListener("click",async()=>{await db.auth.signOut();show()});
 
- F.onsubmit=async e=>{e.preventDefault();$("#ferr").textContent="";const v=Object.fromEntries(new FormData(F)),btn=$("#save");btn.disabled=true;
+F.addEventListener("submit",async e=>{e.preventDefault();$("#ferr").textContent="";const v=Object.fromEntries(new FormData(F)),btn=$("#save");btn.disabled=true;
   let image_url=editing?editing.image_url:null,oldPath=null;const file=$("#img").files[0];
   if(file&&(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>2*1024*1024)){$("#ferr").textContent="Photo must be a JPG, PNG or WebP under 2 MB.";btn.disabled=false;return}
   if(file){const path=Date.now()+"-"+file.name.replace(/[^\w.-]/g,"_");
@@ -98,9 +105,9 @@ function setupTurnstile(){
   const{error}=await q;btn.disabled=false;
   if(error){$("#ferr").textContent=error.code==="23505"?"A product with this name already exists. Edit that one instead.":"Could not save: "+error.message;return}
   if(oldPath)await db.storage.from("product-images").remove([oldPath]);
-  const was=!!editing;reset();toast(was?"Changes saved":"Product saved");refresh()};
+  const was=!!editing;reset();toast(was?"Changes saved":"Product saved");refresh()});
 
- $("#list").onclick=async e=>{const b=e.target.closest("button");if(!b)return;const d=b.dataset;
+$("#list").addEventListener("click",async e=>{const b=e.target.closest("button");if(!b)return;const d=b.dataset;
   if(d.edit)return edit(d.edit);
   if(d.del){const p=ROWS.find(x=>x.id==d.del);if(!confirm(`Delete "${p.name}"? This cannot be undone.`))return;
    const{error}=await db.from("products").delete().eq("id",p.id);if(error){toast("Could not delete");return}
@@ -109,10 +116,10 @@ function setupTurnstile(){
    if(error){toast("Could not update");return}refresh()}
   else if(d.addstock){const p=ROWS.find(x=>x.id==d.addstock);const n=parseInt(prompt(`How many units of "${p.name}" to add to stock?`,"1"),10);
    if(!(n>0))return;const{error}=await db.from("products").update({stock_qty:(p.stock_qty||0)+n,in_stock:true}).eq("id",p.id);
-   if(error){toast("Could not update stock");return}toast("Stock updated");refresh()}};
+   if(error){toast("Could not update stock");return}toast("Stock updated");refresh()}});
 
- $("#imp").onclick=async()=>{if(!confirm("Add the 13 sample products? Do this only once."))return;
+$("#imp").addEventListener("click",async()=>{if(!confirm("Add the 13 sample products? Do this only once."))return;
   const rows=SAMPLE_PRODUCTS.map(p=>({name:p.name,category:p.cat,active_ingredient:p.ai,packs:p.packs.map(x=>x[0]),price:Math.min(...p.packs.map(x=>x[1])),in_stock:!!p.stock,crops:p.crops,problems:p.probs,controls:p.controls,dosage:p.dose,application:p.method,pre_harvest:p.phi,safety:p.safety,rate_per_ha:p.rate||null,unit:p.unit||null}));
-  const{error}=await db.from("products").insert(rows);toast(error?"Import failed: "+error.message:"Samples imported");refresh()};
- show();setupTurnstile();
+  const{error}=await db.from("products").insert(rows);toast(error?"Import failed: "+error.message:"Samples imported");refresh()});
+show();setupTurnstile();
 }
