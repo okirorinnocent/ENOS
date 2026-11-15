@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>Admin | Samaritan Agro-Dealers</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="bg-card border-b" style="border-color:var(--line)"><div class="wrap flex items-center gap-3 py-3 px-4">
+ <b style="color:var(--g)">Samaritan Agro-Dealers: Admin</b><a href="index.html" class="ml-auto text-sm">View site</a><button id="out" class="btn btn-out hidden">Sign out</button></div></header>
+<main class="wrap px-4 py-6">
+ <p id="setup" class="warn hidden">Supabase is not connected. Fill in SUPA and KEY in config.js (see SETUP.md).</p>
+
+ <form id="login" class="card grid gap-3 max-w-sm hidden">
+  <h1 class="font-extrabold text-xl">Admin sign in</h1>
+  <input id="em" type="email" class="field" placeholder="Email" required autocomplete="username">
+  <input id="pw" type="password" class="field" placeholder="Password" required autocomplete="current-password">
+  <button class="btn btn-green">Sign in</button><p id="lerr" class="text-sm" style="color:#b3261e"></p>
+ </form>
+
+ <div id="panel" class="hidden">
+  <form id="add" class="card grid gap-3 md:grid-cols-2">
+   <h2 class="font-extrabold text-xl md:col-span-2">Add a product</h2>
+   <input name="name" class="field" placeholder="Product name *" required>
+   <select name="category" class="field" required></select>
+   <input name="active_ingredient" class="field" placeholder="Active ingredient">
+   <input name="packs" class="field" placeholder="Pack sizes, comma separated (1 L, 5 L)">
+   <input name="price" type="number" min="0" class="field" placeholder="Price from, UGX (optional)">
+   <label class="flex items-center gap-2"><input type="checkbox" name="in_stock" checked> In stock</label>
+   <input name="crops" class="field" placeholder="Crops it suits (Maize, Beans)">
+   <input name="problems" class="field" placeholder="Problems it solves (Weeds, Aphids)">
+   <textarea name="controls" class="field md:col-span-2" rows="2" placeholder="What it controls / is used for"></textarea>
+   <input name="dosage" class="field" placeholder="Dosage guide">
+   <input name="application" class="field" placeholder="Application method">
+   <input name="pre_harvest" class="field" placeholder="Pre-harvest interval">
+   <input name="safety" class="field" placeholder="Safety warning">
+   <input name="rate_per_ha" type="number" step="any" min="0" class="field" placeholder="Rate per hectare (for calculator)">
+   <select name="unit" class="field"><option value="">Rate unit</option><option>L</option><option>kg</option></select>
+   <label class="md:col-span-2">Photo (optional)<input id="img" type="file" accept="image/*" class="field"></label>
+   <button class="btn btn-green md:col-span-2">Save product</button>
+  </form>
+
+  <div class="flex flex-wrap items-center gap-3 mt-8 mb-3"><h2 class="font-extrabold text-xl">Products (<span id="n">0</span>)</h2>
+   <button id="imp" class="btn btn-out ml-auto">Import sample products</button></div>
+  <div id="list" class="grid gap-2"></div>
+ </div>
+</main>
+<div id="toast" role="status"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script><script src="sample-products.js"></script><script src="admin.js"></script>
+</body></html>
