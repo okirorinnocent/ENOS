@@ -42,11 +42,11 @@ else{
   if(error){$("#lerr").textContent="Wrong email or password.";return}show()};
  $("#out").onclick=async()=>{await db.auth.signOut();show()};
 
- F.onsubmit=async e=>{e.preventDefault();const v=Object.fromEntries(new FormData(F)),btn=$("#save");btn.disabled=true;
+ F.onsubmit=async e=>{e.preventDefault();$("#ferr").textContent="";const v=Object.fromEntries(new FormData(F)),btn=$("#save");btn.disabled=true;
   let image_url=editing?editing.image_url:null,oldPath=null;const file=$("#img").files[0];
   if(file){const path=Date.now()+"-"+file.name.replace(/[^\w.-]/g,"_");
    const up=await db.storage.from("product-images").upload(path,file);
-   if(up.error){toast("Image upload failed: "+up.error.message);btn.disabled=false;return}
+   if(up.error){$("#ferr").textContent="Photo upload failed: "+up.error.message;btn.disabled=false;return}
    oldPath=imgPath(image_url);image_url=db.storage.from("product-images").getPublicUrl(path).data.publicUrl}
   else if(editing&&$("#rmimg").checked){oldPath=imgPath(image_url);image_url=null}
   const row={name:v.name.trim(),category:v.category,active_ingredient:v.active_ingredient||null,packs:list(v.packs),price:v.price?+v.price:null,
@@ -54,7 +54,7 @@ else{
    application:v.application||null,pre_harvest:v.pre_harvest||null,safety:v.safety||null,rate_per_ha:v.rate_per_ha?+v.rate_per_ha:null,unit:v.unit||null,image_url};
   const q=editing?db.from("products").update(row).eq("id",editing.id):db.from("products").insert(row);
   const{error}=await q;btn.disabled=false;
-  if(error){toast("Could not save: "+error.message);return}
+  if(error){$("#ferr").textContent="Could not save: "+error.message;return}
   if(oldPath)await db.storage.from("product-images").remove([oldPath]);
   const was=!!editing;reset();toast(was?"Changes saved":"Product saved");refresh()};
 
