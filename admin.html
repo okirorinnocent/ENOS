@@ -2,7 +2,7 @@
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
 <title>Admin | Samaritan Agro-Dealers</title>
-<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script src="https://cdn.tailwindcss.com/3.4.17" integrity="sha384-igm5BeiBt36UU4gqwWS7imYmelpTsZlQ45FZf+XBn9MuJbn4nQr7yx1yFydocC/K" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,6 +15,7 @@
   <h1 class="font-extrabold text-xl">Admin sign in</h1>
   <input id="em" type="email" class="field" placeholder="Email" required autocomplete="username">
   <input id="pw" type="password" class="field" placeholder="Password" required autocomplete="current-password">
+  <div id="turnstile" aria-label="Security check"></div>
   <button class="btn btn-green">Sign in</button><p id="lerr" class="text-sm" style="color:#b3261e"></p>
  </form>
 
@@ -50,6 +51,7 @@
  </div>
 </main>
 <div id="toast" role="status"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
 <script src="config.js"></script><script src="sample-products.js"></script><script src="admin.js"></script>
 </body></html>

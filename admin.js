@@ -11,7 +11,14 @@ const picked=n=>[...F.querySelectorAll(`input[name=${n}]:checked`)].map(i=>i.val
 const setPicked=(n,a)=>F.querySelectorAll(`input[name=${n}]`).forEach(i=>i.checked=(a||[]).some(x=>x.trim().toLowerCase()===i.value.toLowerCase()));
 if(!C.SUPA||!C.KEY){$("#setup").classList.remove("hidden")}
 else{
- const db=supabase.createClient(C.SUPA,C.KEY);let ROWS=[],editing=null;
+ const db=supabase.createClient(C.SUPA,C.KEY);let ROWS=[],editing=null,captchaToken="",turnstileWidget=null;
+ function setupTurnstile(){
+  const box=$("#turnstile");
+  if(!C.TURNSTILE_SITE_KEY){box.remove();return}
+  if(!window.turnstile){setTimeout(setupTurnstile,100);return}
+  window.turnstile.ready(()=>{turnstileWidget=window.turnstile.render(box,{sitekey:C.TURNSTILE_SITE_KEY,
+   callback:t=>{captchaToken=t}, "expired-callback":()=>{captchaToken=""}, "error-callback":()=>{captchaToken=""}})})
+ }
  const imgPath=u=>{const m=(u||"").split("/product-images/")[1];return m?decodeURIComponent(m):null};
  async function isAdmin(){const{data:{user}}=await db.auth.getUser();if(!user)return false;
   const{data,error}=await db.from("admins").select("user_id").eq("user_id",user.id).maybeSingle();
@@ -42,8 +49,10 @@ else{
  $("#cancel").onclick=reset;
 
  $("#login").onsubmit=async e=>{e.preventDefault();$("#lerr").textContent="";
-  const{error}=await db.auth.signInWithPassword({email:$("#em").value,password:$("#pw").value});
-  if(error){$("#lerr").textContent="Wrong email or password.";return}show()};
+  if(C.TURNSTILE_SITE_KEY&&!captchaToken){$("#lerr").textContent="Complete the security check first.";return}
+  const options=C.TURNSTILE_SITE_KEY?{captchaToken}:undefined;
+  const{error}=await db.auth.signInWithPassword({email:$("#em").value,password:$("#pw").value,...(options?{options}:{})});
+  if(error){$("#lerr").textContent="Wrong email or password.";captchaToken="";if(turnstileWidget!==null)window.turnstile.reset(turnstileWidget);return}show()};
  $("#out").onclick=async()=>{await db.auth.signOut();show()};
 
  F.onsubmit=async e=>{e.preventDefault();$("#ferr").textContent="";const v=Object.fromEntries(new FormData(F)),btn=$("#save");btn.disabled=true;
@@ -79,5 +88,5 @@ else{
  $("#imp").onclick=async()=>{if(!confirm("Add the 13 sample products? Do this only once."))return;
   const rows=SAMPLE_PRODUCTS.map(p=>({name:p.name,category:p.cat,active_ingredient:p.ai,packs:p.packs.map(x=>x[0]),price:Math.min(...p.packs.map(x=>x[1])),in_stock:!!p.stock,crops:p.crops,problems:p.probs,controls:p.controls,dosage:p.dose,application:p.method,pre_harvest:p.phi,safety:p.safety,rate_per_ha:p.rate||null,unit:p.unit||null}));
   const{error}=await db.from("products").insert(rows);toast(error?"Import failed: "+error.message:"Samples imported");refresh()};
- show();
+ setupTurnstile();show();
 }
