@@ -1,0 +1,29 @@
+/* SAMARITAN AGRO-DEALERS: theme + components (Tailwind CDN handles layout) */
+:root{--g:#1B5E20;--g2:#2E7D32;--lime:#B7E34A;--earth:#F6F1E7;--sand:#E8DFCB;--bg:#FBF9F4;--card:#fff;--ink:#1d2a1f;--mute:#5b6b5e;--line:#e3ddcf}
+html.dark{--bg:#101a12;--card:#17251a;--ink:#eaf2e6;--mute:#a7b8a9;--line:#27402b;--earth:#142016;--sand:#1d3022}
+html{scroll-behavior:smooth;scroll-padding-top:4.5rem}
+body{background:var(--bg);color:var(--ink);font-family:system-ui,"Segoe UI",Roboto,sans-serif;font-size:17px;line-height:1.6}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+:focus-visible{outline:3px solid var(--lime);outline-offset:2px}
+.hero{background:linear-gradient(120deg,rgba(27,94,32,.96),rgba(46,125,50,.88)),repeating-linear-gradient(60deg,#1B5E20 0 18px,#24692a 18px 36px);color:#fff}
+.btn{display:inline-block;padding:.7rem 1.2rem;border-radius:.8rem;font-weight:700;cursor:pointer;border:2px solid transparent;transition:transform .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn-lime{background:var(--lime);color:#14340f}.btn-green{background:var(--g);color:#fff}
+.btn-out{border-color:currentColor;background:transparent}
+.card{background:var(--card);border:1px solid var(--line);border-radius:1.1rem;padding:1rem}
+.field{width:100%;padding:.65rem .8rem;border-radius:.7rem;border:1.5px solid var(--line);background:var(--card);color:var(--ink)}
+.badge{font-size:.75rem;font-weight:700;padding:.15rem .55rem;border-radius:99px}
+.in{background:#dff3c4;color:#1B5E20}.out{background:#fbd9d4;color:#8a1c10}
+.sec{padding:3.5rem 1rem}.wrap{max-width:68rem;margin:auto}
+h2.t{font-size:1.9rem;font-weight:800;color:var(--g);margin-bottom:1rem}html.dark h2.t{color:var(--lime)}
+.warn{background:#fff4d6;border-left:6px solid #e0a100;color:#4a3600;padding:.8rem 1rem;border-radius:.6rem}
+dialog{border:0;border-radius:1.2rem;padding:1.2rem;max-width:34rem;width:92vw;background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.55)}
+#toast{position:fixed;left:50%;bottom:1.2rem;transform:translateX(-50%);background:var(--g);color:#fff;padding:.7rem 1.2rem;border-radius:99px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:60}
+#toast.show{opacity:1}
+.bg-card{background:var(--card)}.bg-earth{background:var(--earth)}
+
+/* Tailwind preflight removes dialog padding; this wins on specificity */
+html dialog{padding:1.2rem}
+.brand{color:var(--g)}html.dark .brand{color:var(--lime)}
+.brand-mark{width:2.25rem;height:2.25rem;flex:none;display:block}
