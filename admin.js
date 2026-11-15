@@ -1,5 +1,8 @@
 /* Admin: sign in, add / edit / delete products, add stock, change photos. Security is enforced by Supabase RLS (supabase.sql), not by this page. */
 const $=s=>document.querySelector(s),C=window.CFG;
+const fail=m=>{const s=$("#setup");s.textContent=m;s.classList.remove("hidden")};
+addEventListener("error",e=>fail("Admin page error: "+(e.message||"script failed to load")+". Press F12 > Console for details."));
+if(!window.supabase)fail("Could not load the Supabase library. Check your internet, turn off any ad-blocker for this site, then reload (Ctrl+Shift+R).");
 const CATS=["Herbicides","Insecticides","Fungicides","Fertilizers","Seeds","Veterinary","Equipment"];
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const list=v=>(v||"").split(",").map(x=>x.trim()).filter(Boolean);

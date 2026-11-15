@@ -15,3 +15,9 @@ update storage.buckets set file_size_limit = 2097152, allowed_mime_types = array
 do $$ begin
   alter table public.products add constraint products_text_len check (char_length(name) <= 120 and char_length(coalesce(controls,'')) <= 1000 and char_length(coalesce(safety,'')) <= 1000);
 exception when duplicate_object then null; end $$;
+
+-- Needed by the admin page (Quantity in stock / + Add stock). Safe to run on an existing database.
+alter table public.products add column if not exists stock_qty integer;
+do $$ begin
+  alter table public.products add constraint products_qty_ok check (stock_qty is null or stock_qty >= 0);
+exception when duplicate_object then null; end $$;

@@ -16,12 +16,12 @@
 4. Create a Cloudflare Turnstile widget for this hostname. Put only its public site key in `config.js` as `TURNSTILE_SITE_KEY`. In Supabase > Authentication > CAPTCHA, select Turnstile and save the secret key there; never put the secret key in this repository.
 5. Add a WAF Managed Challenge rule for `/admin` and `/admin.html`, and rate-limit requests to `/admin.html`. Test from a private browser before using Block.
 
-`admin.html`, `admin.js` and `config.js` are sent with `no-store`. The repository also sends a Content-Security-Policy-Report-Only header so browser violations can be fixed before enforcement. The current CDN scripts use pinned URLs and SRI hashes.
+`admin.html`, `admin.js` and `config.js` are sent with `no-store`. The repository also sends a Content-Security-Policy-Report-Only header so browser violations can be fixed before enforcement. The site no longer depends on the Tailwind CDN (layout CSS is in `style.css`); the admin page still loads supabase-js from a pinned, SRI-checked URL.
 
 ## Supabase hardening
 
 - Disable public sign-ups, require email confirmation, enable MFA for the administrator, and use a long unique password.
-- Run `harden.sql` after `supabase.sql`; it limits product fields and restricts product images to JPEG, PNG or WebP under 2 MB.
+- Run `harden.sql` after `supabase.sql` (it also adds the `stock_qty` column the admin page needs, so existing databases must run it); it limits product fields and restricts product images to JPEG, PNG or WebP under 2 MB.
 - Keep RLS enabled. Public users may read products and images; only rows in `public.admins` may write products or storage.
 - The browser may contain only the publishable key. Never commit a `service_role` key.
 - Restrict Authentication redirect URLs and CORS to `https://samaritan.agro.okirorinnocent.tech`.
