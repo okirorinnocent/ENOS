@@ -1,9 +1,16 @@
 /* SAMARITAN AGRO-DEALERS: public site logic. Products come from Supabase (see config.js) or fall back to sample-products.js */
 const CATS=["Herbicides","Insecticides","Fungicides","Fertilizers","Seeds","Veterinary","Equipment"];
 const $=s=>document.querySelector(s),C=window.CFG;
-const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&","<":"<",">":">",'"':""","'":"'"}[c]));
 const ugx=n=>"UGX "+Number(n).toLocaleString("en-UG");
 const wa=t=>`https://wa.me/${C.WA}?text=${encodeURIComponent(t)}`;
+const SUPABASE_STORAGE_HOST = C.SUPA ? new URL(C.SUPA).hostname.replace(/^.*?\./, '') : null;
+const isValidStorageUrl = u => {
+  try {
+    const url = new URL(u);
+    return url.protocol === "https:" && url.hostname.endsWith(SUPABASE_STORAGE_HOST || "");
+  } catch { return false; }
+};
 let PRODUCTS=[];
 
 /* Normalise sample items and database rows to one shape */
