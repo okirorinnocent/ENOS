@@ -26,3 +26,4 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
 /* Tailwind preflight removes dialog padding; this wins on specificity */
 html dialog{padding:1.2rem}
 .brand{color:var(--g)}html.dark .brand{color:var(--lime)}
+.brand-mark{width:2.25rem;height:2.25rem;flex:none;display:block}
