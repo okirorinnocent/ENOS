@@ -48,6 +48,7 @@ else{
 
  F.onsubmit=async e=>{e.preventDefault();$("#ferr").textContent="";const v=Object.fromEntries(new FormData(F)),btn=$("#save");btn.disabled=true;
   let image_url=editing?editing.image_url:null,oldPath=null;const file=$("#img").files[0];
+  if(file&&(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>2*1024*1024)){$("#ferr").textContent="Photo must be a JPG, PNG or WebP under 2 MB.";btn.disabled=false;return}
   if(file){const path=Date.now()+"-"+file.name.replace(/[^\w.-]/g,"_");
    const up=await db.storage.from("product-images").upload(path,file);
    if(up.error){$("#ferr").textContent="Photo upload failed: "+up.error.message;btn.disabled=false;return}
