@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Samaritan Agro-Dealers | Agro-inputs &amp; Agric Services, Kolir–Kachumbala Road</title>
+<meta name="description" content="Samaritan Agro-Dealers: dealers in all agro-inputs and agricultural services on Kolir–Kachumbala road. Find the right product, use it safely, order by WhatsApp.">
+<meta property="og:title" content="Samaritan Agro-Dealers"><meta property="og:description" content="Agro-inputs and agric services, Kolir–Kachumbala road. Browse products and order by WhatsApp."><meta property="og:type" content="website">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Samaritan Agro-Dealers","description":"Dealers in all agro-inputs and agric related services","address":{"@type":"PostalAddress","streetAddress":"Kolir–Kachumbala road","addressCountry":"UG"},"telephone":"+256700000000"}</script>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="sticky top-0 z-40 bg-card border-b" style="border-color:var(--line)">
+ <nav class="wrap flex items-center gap-3 py-3 px-4" aria-label="Main">
+  <a href="#top" class="font-extrabold text-lg" style="color:var(--g)">🌱 Samaritan Agro-Dealers</a>
+  <div class="hidden md:flex gap-4 ml-auto text-sm font-semibold">
+   <a href="#products">Products</a><a href="#advisor">Advisor</a><a href="#calculator">Calculator</a><a href="#safety">Safety</a><a href="#tips">Tips</a><a href="#contact">Contact</a></div>
+  <button id="dark" class="ml-auto md:ml-2 btn btn-out" aria-label="Toggle dark mode">🌙</button>
+  <button id="cartBtn" class="btn btn-green" aria-label="Open cart">🛒 <span id="badge">0</span></button>
+ </nav>
+</header>
+
+<main id="top">
+<section class="hero sec">
+ <div class="wrap">
+  <h1 class="text-4xl md:text-5xl font-extrabold max-w-2xl leading-tight">Agro-inputs and farm services you can trust, on Kolir–Kachumbala road</h1>
+  <p class="mt-4 text-lg max-w-xl">Seeds, fertilizers, crop protection, veterinary supplies and equipment. Find the right product, learn to use it safely, order in minutes.</p>
+  <div class="mt-6 flex flex-wrap gap-3"><a href="#products" class="btn btn-lime">Browse Products</a><a id="waHero" class="btn btn-out" target="_blank" rel="noopener">WhatsApp Us</a></div>
+  <p class="mt-8 text-sm opacity-90">Hero photo placeholder: replace the background in style.css with a lightweight image of healthy crops.</p>
+ </div>
+</section>
+
+<section id="products" class="sec"><div class="wrap">
+ <h2 class="t">Product catalogue</h2>
+ <div class="grid gap-3 md:grid-cols-3 mb-5">
+  <input id="q" class="field" type="search" placeholder="Search name or active ingredient" aria-label="Search products">
+  <select id="cat" class="field" aria-label="Category"></select>
+  <select id="sort" class="field" aria-label="Sort"><option value="name">Sort: name</option><option value="lo">Price: low to high</option><option value="hi">Price: high to low</option></select>
+ </div>
+ <div id="grid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+ <p class="text-sm mt-3" style="color:var(--mute)">Prices are sample figures in UGX; update them in app.js and confirm at the shop.</p>
+</div></section>
+
+<section id="advisor" class="sec bg-earth"><div class="wrap">
+ <h2 class="t">Crop and problem advisor</h2>
+ <div class="grid gap-3 md:grid-cols-2 max-w-2xl"><select id="aCrop" class="field" aria-label="Crop"></select><select id="aProb" class="field" aria-label="Problem"></select></div>
+ <div id="aOut" class="grid gap-4 sm:grid-cols-2 mt-5"></div>
+ <p class="warn mt-4">Suggestions are a starting point. Confirm the pest or disease with an agronomist or our shop team and read the label before buying.</p>
+</div></section>
+
+<section id="calculator" class="sec"><div class="wrap">
+ <h2 class="t">Dosage calculator</h2>
+ <div class="card grid gap-3 md:grid-cols-2 max-w-3xl">
+  <label>Product<select id="cProd" class="field"></select></label>
+  <label>Area<span class="flex gap-2"><input id="cArea" type="number" min="0" step="0.1" value="1" class="field"><select id="cUnit" class="field" style="max-width:8rem"><option value="1">acres</option><option value="2.471">hectares</option></select></span></label>
+  <label>Sprayer tank (litres)<input id="cTank" type="number" min="1" value="16" class="field"></label>
+  <label>Water per hectare (litres)<input id="cWater" type="number" min="50" value="200" class="field"></label>
+  <div id="cOut" class="md:col-span-2 font-semibold" aria-live="polite"></div>
+ </div>
+ <p class="warn mt-4 max-w-3xl">Rates here are typical sample figures. The label on your pack always overrides this tool.</p>
+</div></section>
+
+<section id="safety" class="sec bg-earth"><div class="wrap">
+ <h2 class="t">Safety and good practice</h2>
+ <p class="warn mb-4"><strong>Always read the label.</strong> Use products only as directed and follow Ugandan regulations.</p>
+ <div class="grid gap-4 md:grid-cols-3">
+  <div class="card"><h3 class="font-bold">Protect yourself</h3><p>Wear gloves, boots, long sleeves, a mask and goggles. Do not eat, drink or smoke while spraying. Wash hands and clothes afterwards.</p></div>
+  <div class="card"><h3 class="font-bold">Store and dispose</h3><p>Keep chemicals in original containers, locked, away from food, children and animals. Triple-rinse empty containers, pour rinse water into the tank, then puncture and bury them. Never reuse them.</p></div>
+  <div class="card"><h3 class="font-bold">Before harvest</h3><p>Respect the pre-harvest interval (PHI) on the label. Do not spray near water sources or when it is windy or about to rain.</p></div>
+ </div>
+ <div class="card mt-4"><h3 class="font-bold">First aid</h3><p>Move the person to fresh air, remove contaminated clothing, rinse skin or eyes with clean water for 15 minutes. Do not induce vomiting. Go to the nearest health centre at once and carry the product label.</p></div>
+</div></section>
+
+<section id="tips" class="sec"><div class="wrap">
+ <h2 class="t">Farmer tips</h2>
+ <div class="grid gap-4 md:grid-cols-3">
+  <article class="card"><h3 class="font-bold">How to read a pesticide label</h3><p>Check the active ingredient, target pest, crop, dose, PHI, warning colour band and first aid before you buy or mix.</p></article>
+  <article class="card"><h3 class="font-bold">Fall armyworm: scout early</h3><p>Check young maize weekly for window-pane holes and frass in the whorl. Early, targeted control works better than late heavy spraying.</p></article>
+  <article class="card"><h3 class="font-bold">Calibrate your sprayer</h3><p>Spray a measured plot with plain water first to learn how many tanks per acre you really use. It saves money and avoids overdosing.</p></article>
+ </div>
+</div></section>
+
+<section id="about" class="sec bg-earth"><div class="wrap grid gap-6 md:grid-cols-2">
+ <div><h2 class="t">About us</h2><p><strong>Samaritan Agro-Dealers</strong> are dealers in all agro-inputs and all agric related services, located on Kolir–Kachumbala road. We help farmers and agro-dealers choose the right input and use it safely.</p>
+  <p class="mt-3"><strong>Hours (edit):</strong> Mon–Sat 8:00–18:00, Sun closed.</p>
+  <blockquote class="card mt-4">“Helpful advice and fair prices.” <span style="color:var(--mute)">Sample testimonial: replace with a real customer quote.</span></blockquote></div>
+ <iframe title="Map: Kachumbala" loading="lazy" class="w-full rounded-2xl border-0" style="min-height:18rem" src="https://maps.google.com/maps?q=Kachumbala%20Uganda&output=embed"></iframe>
+</div></section>
+
+<section id="contact" class="sec"><div class="wrap max-w-2xl">
+ <h2 class="t">Contact</h2>
+ <form id="cf" class="card grid gap-3" novalidate>
+  <input id="cfN" class="field" placeholder="Your name" required aria-label="Name"><input id="cfP" class="field" type="tel" placeholder="Phone" required aria-label="Phone">
+  <textarea id="cfM" class="field" rows="3" placeholder="How can we help?" required aria-label="Message"></textarea>
+  <button class="btn btn-green">Send on WhatsApp</button>
+ </form>
+ <p class="mt-3">Phone: <a href="tel:+256700000000">+256 700 000 000</a> (edit)</p>
+</div></section>
+</main>
+
+<footer class="sec text-sm" style="background:var(--g);color:#fff"><div class="wrap">
+ <p><strong>Samaritan Agro-Dealers</strong>, Kolir–Kachumbala road. Licence/registration no.: [add here]</p>
+ <p class="mt-2 opacity-90">Use all products according to the label and local regulations. Results depend on crop, weather and correct use.</p>
+</div></footer>
+
+<dialog id="pm"></dialog>
+<dialog id="cart"></dialog>
+<div id="toast" role="status"></div>
+<script src="app.js"></script>
+</body></html>
