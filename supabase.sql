@@ -14,7 +14,8 @@ create table if not exists public.products (
   problems text[] not null default '{}',
   controls text, dosage text, application text, pre_harvest text, safety text,
   rate_per_ha numeric, unit text check (unit in ('L','kg')),
-  image_url text
+  image_url text,
+  stock_qty integer check (stock_qty is null or stock_qty >= 0)
 );
 
 alter table public.admins   enable row level security;

@@ -8,7 +8,7 @@ let PRODUCTS=[];
 
 /* Normalise sample items and database rows to one shape */
 const fromSample=p=>({...p,packs:p.packs.map(x=>x[0]),price:Math.min(...p.packs.map(x=>x[1]))});
-const fromRow=r=>({id:r.id,name:r.name,cat:r.category,ai:r.active_ingredient||"",packs:r.packs||[],price:r.price,stock:r.in_stock,crops:r.crops||[],probs:r.problems||[],controls:r.controls||"",dose:r.dosage||"See label",method:r.application||"See label",phi:r.pre_harvest||"See label",safety:r.safety||"Read the label before use.",rate:r.rate_per_ha,unit:r.unit,img:r.image_url});
+const fromRow=r=>({id:r.id,name:r.name,cat:r.category,ai:r.active_ingredient||"",packs:r.packs||[],price:r.price,stock:r.in_stock,crops:r.crops||[],probs:r.problems||[],controls:r.controls||"",dose:r.dosage||"See label",method:r.application||"See label",phi:r.pre_harvest||"See label",safety:r.safety||"Read the label before use.",rate:r.rate_per_ha,unit:r.unit,img:r.image_url,qty:r.stock_qty});
 
 function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
 if(localStorage.dark==="1")document.documentElement.classList.add("dark");
@@ -18,13 +18,13 @@ $("#dark").onclick=()=>{const d=document.documentElement.classList.toggle("dark"
 $("#cat").innerHTML='<option value="">All categories</option>'+CATS.map(c=>`<option>${c}</option>`).join("");
 const enq=p=>wa(`Hello ${C.BIZ}, I am interested in ${p.name}. Is it available, and what is the price?`);
 function card(p){return `<article class="card flex flex-col">${p.img?`<img src="${esc(p.img)}" alt="${esc(p.name)}" loading="lazy" class="rounded-xl mb-2 w-full object-cover" style="height:9rem">`:""}
-<div class="flex justify-between items-start gap-2"><span class="badge" style="background:var(--sand)">${esc(p.cat)}</span><span class="badge ${p.stock?"in":"out"}">${p.stock?"In stock":"Out of stock"}</span></div>
+<div class="flex justify-between items-start gap-2"><span class="badge" style="background:var(--sand)">${esc(p.cat)}</span><span class="badge ${p.stock?"in":"out"}">${p.stock?(p.qty!=null&&p.qty>0&&p.qty<=5?"Low stock":"In stock"):"Out of stock"}</span></div>
 <h3 class="font-bold text-lg mt-2">${esc(p.name)}</h3><p class="text-sm" style="color:var(--mute)">${esc(p.ai)}</p>
 ${p.packs.length?`<p class="text-sm mt-1">Pack sizes: ${p.packs.map(esc).join(", ")}</p>`:""}
 <p class="font-extrabold mt-1">${p.price?"From "+ugx(p.price):"Ask for price"}</p>
 <div class="flex gap-2 mt-3"><button class="btn btn-out flex-1" data-info="${p.id}">Details</button><a class="btn btn-green flex-1 text-center" href="${enq(p)}" target="_blank" rel="noopener">Enquire</a></div></article>`}
 function render(){const q=$("#q").value.toLowerCase(),c=$("#cat").value,s=$("#sort").value;
- const l=PRODUCTS.filter(p=>(!c||p.cat===c)&&(p.name+p.ai).toLowerCase().includes(q));
+ const l=PRODUCTS.filter(p=>(!c||p.cat===c)&&[p.name,p.ai,...p.crops,...p.probs].join(" ").toLowerCase().includes(q));
  l.sort((a,b)=>s==="lo"?(a.price||1e12)-(b.price||1e12):s==="hi"?(b.price||0)-(a.price||0):a.name.localeCompare(b.name));
  $("#grid").innerHTML=l.map(card).join("")||"<p>No products to show yet. Ask us on WhatsApp and we will help.</p>";
  $("#count").textContent=PRODUCTS.length}
@@ -63,8 +63,9 @@ $("#cf").addEventListener("submit",e=>{e.preventDefault();const n=$("#cfN").valu
 $("#waHero").href=wa("Hello "+C.BIZ);
 
 /* Load products: Supabase REST (public read) -> fallback to samples */
-async function load(){PRODUCTS=SAMPLE_PRODUCTS.map(fromSample);
- if(C.SUPA&&C.KEY){try{const r=await fetch(`${C.SUPA}/rest/v1/products?select=*&order=name`,{headers:{apikey:C.KEY,Authorization:"Bearer "+C.KEY}});
-  if(!r.ok)throw 0;PRODUCTS=(await r.json()).map(fromRow)}catch(e){toast("Showing sample products (could not reach database)")}}
+async function load(){PRODUCTS=[];
+ if(!(C.SUPA&&C.KEY))PRODUCTS=SAMPLE_PRODUCTS.map(fromSample);
+ else{try{const r=await fetch(`${C.SUPA}/rest/v1/products?select=*&order=name`,{headers:{apikey:C.KEY,Authorization:"Bearer "+C.KEY}});
+  if(!r.ok)throw 0;PRODUCTS=(await r.json()).map(fromRow)}catch(e){toast("Could not load products. Please refresh or WhatsApp us.")}}
  render();advise();fillCalc()}
 load();

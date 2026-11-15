@@ -21,7 +21,7 @@
 ## Supabase hardening
 
 - Disable public sign-ups, require email confirmation, enable MFA for the administrator, and use a long unique password.
-- Run `harden.sql` after `supabase.sql`; it limits product fields and restricts product images to JPEG, PNG or WebP under 2 MB.
+- Run `harden.sql` after `supabase.sql` (it also adds the `stock_qty` column the admin page needs, so existing databases must run it); it limits product fields and restricts product images to JPEG, PNG or WebP under 2 MB.
 - Keep RLS enabled. Public users may read products and images; only rows in `public.admins` may write products or storage.
 - The browser may contain only the publishable key. Never commit a `service_role` key.
 - Restrict Authentication redirect URLs and CORS to `https://samaritan.agro.okirorinnocent.tech`.
