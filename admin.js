@@ -15,10 +15,13 @@ const setPicked=(n,a)=>F.querySelectorAll(`input[name=${n}]`).forEach(i=>i.check
 if(!C.SUPA||!C.KEY){$("#setup").classList.remove("hidden")}
 else{
  const db=supabase.createClient(C.SUPA,C.KEY);let ROWS=[],editing=null,captchaToken="",turnstileWidget=null;
+ let tsTries=0;
  function setupTurnstile(){
   const box=$("#turnstile");
   if(!C.TURNSTILE_SITE_KEY){box.remove();return}
-  if(!window.turnstile){setTimeout(setupTurnstile,100);return}
+  if(!window.turnstile||typeof window.turnstile.render!=="function"){
+   if(++tsTries>100){$("#lerr").textContent="Security check could not load. Disable ad-blockers, check your connection and reload.";return}
+   setTimeout(setupTurnstile,150);return}
   try{turnstileWidget=window.turnstile.render(box,{sitekey:C.TURNSTILE_SITE_KEY,
    callback:t=>{captchaToken=t}, "expired-callback":()=>{captchaToken=""}, "error-callback":()=>{captchaToken=""}})}
   catch(err){$("#lerr").textContent="Security check could not start: "+err.message}
