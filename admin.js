@@ -1,7 +1,7 @@
 /* Admin: sign in, add / edit / delete products, add stock, change photos. Security is enforced by Supabase RLS (supabase.sql), not by this page. */
 const $=s=>document.querySelector(s),C=window.CFG;
 const fail=m=>{const s=$("#setup");s.textContent=m;s.classList.remove("hidden")};
-addEventListener("error",e=>fail("Admin page error: "+(e.message||"script failed to load")+". Press F12 > Console for details."));
+addEventListener("error",e=>{if(!/admin\.js/.test(e.filename||""))return;fail("Admin page error: "+(e.message||"script failed to load")+". Press F12 > Console for details.")});
 if(!window.supabase)fail("Could not load the Supabase library. Check your internet, turn off any ad-blocker for this site, then reload (Ctrl+Shift+R).");
 const CATS=["Herbicides","Insecticides","Fungicides","Fertilizers","Seeds","Veterinary","Equipment"];
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -19,8 +19,9 @@ else{
   const box=$("#turnstile");
   if(!C.TURNSTILE_SITE_KEY){box.remove();return}
   if(!window.turnstile){setTimeout(setupTurnstile,100);return}
-  window.turnstile.ready(()=>{turnstileWidget=window.turnstile.render(box,{sitekey:C.TURNSTILE_SITE_KEY,
-   callback:t=>{captchaToken=t}, "expired-callback":()=>{captchaToken=""}, "error-callback":()=>{captchaToken=""}})})
+  try{turnstileWidget=window.turnstile.render(box,{sitekey:C.TURNSTILE_SITE_KEY,
+   callback:t=>{captchaToken=t}, "expired-callback":()=>{captchaToken=""}, "error-callback":()=>{captchaToken=""}})}
+  catch(err){$("#lerr").textContent="Security check could not start: "+err.message}
  }
  const imgPath=u=>{const m=(u||"").split("/product-images/")[1];return m?decodeURIComponent(m):null};
  async function isAdmin(){const{data:{user}}=await db.auth.getUser();if(!user)return false;
@@ -91,5 +92,5 @@ else{
  $("#imp").onclick=async()=>{if(!confirm("Add the 13 sample products? Do this only once."))return;
   const rows=SAMPLE_PRODUCTS.map(p=>({name:p.name,category:p.cat,active_ingredient:p.ai,packs:p.packs.map(x=>x[0]),price:Math.min(...p.packs.map(x=>x[1])),in_stock:!!p.stock,crops:p.crops,problems:p.probs,controls:p.controls,dosage:p.dose,application:p.method,pre_harvest:p.phi,safety:p.safety,rate_per_ha:p.rate||null,unit:p.unit||null}));
   const{error}=await db.from("products").insert(rows);toast(error?"Import failed: "+error.message:"Samples imported");refresh()};
- setupTurnstile();show();
+ show();setupTurnstile();
 }
