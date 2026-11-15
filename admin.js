@@ -16,16 +16,35 @@ if(!C.SUPA||!C.KEY){$("#setup").classList.remove("hidden")}
 else{
  const db=supabase.createClient(C.SUPA,C.KEY);let ROWS=[],editing=null,captchaToken="",turnstileWidget=null;
  let tsTries=0;
- function setupTurnstile(){
-  const box=$("#turnstile");
-  if(!C.TURNSTILE_SITE_KEY){box.remove();return}
-  if(!window.turnstile||typeof window.turnstile.render!=="function"){
-   if(++tsTries>100){$("#lerr").textContent="Security check could not load. Disable ad-blockers, check your connection and reload.";return}
-   setTimeout(setupTurnstile,150);return}
-  try{turnstileWidget=window.turnstile.render(box,{sitekey:C.TURNSTILE_SITE_KEY,
-   callback:t=>{captchaToken=t}, "expired-callback":()=>{captchaToken=""}, "error-callback":()=>{captchaToken=""}})}
-  catch(err){$("#lerr").textContent="Security check could not start: "+err.message}
- }
+function setupTurnstile(){
+   const box=$("#turnstile");
+   const siteKey=C.TURNSTILE_SITE_KEY?.trim();
+   if(!siteKey){box.remove();return}
+   if(!siteKey.startsWith("0x4")){$("#lerr").textContent="Security check key looks wrong (should start with 0x4).";box.remove();return}
+   if(!window.turnstile||typeof window.turnstile.render!=="function"){
+    if(++tsTries>100){$("#lerr").textContent="Security check could not load. Disable ad-blockers, check your connection and reload.";return}
+    setTimeout(setupTurnstile,150);return}
+   const errMsg=code=>{
+    const hints={110100:"Site key invalid",110110:"Site key invalid",110200:"This hostname is not allowed for the widget",300000:"Challenge failed",300010:"Challenge failed",600000:"Challenge failed",600010:"Challenge failed"};
+    const hint=hints[code]||"";
+    const base="Security check error: "+code;
+    return hint?base+" — "+hint+". Try another browser or disable extensions/VPN.":base;
+   };
+   try{turnstileWidget=window.turnstile.render(box,{sitekey:siteKey,
+    callback:t=>{captchaToken=t},
+    "expired-callback":()=>{captchaToken="";$("#lerr").textContent="Security check expired. Please try again."},
+    "timeout-callback":()=>{captchaToken="";$("#lerr").textContent="Security check timed out. Please try again."},
+    "error-callback":code=>{captchaToken="";$("#lerr").textContent=errMsg(code);return true},
+    retry:"auto"})}
+   catch(err){$("#lerr").textContent="Security check could not start: "+err.message}
+   const retryBtn=document.createElement("button");
+   retryBtn.type="button";
+   retryBtn.textContent="Retry security check";
+   retryBtn.className="btn btn-out";
+   retryBtn.style.marginTop="0.5rem";
+   retryBtn.onclick=()=>{captchaToken="";$("#lerr").textContent="";window.turnstile.reset(turnstileWidget)};
+   box.parentNode.insertBefore(retryBtn,box.nextSibling);
+  }
  const imgPath=u=>{const m=(u||"").split("/product-images/")[1];return m?decodeURIComponent(m):null};
  async function isAdmin(){const{data:{user}}=await db.auth.getUser();if(!user)return false;
   const{data,error}=await db.from("admins").select("user_id").eq("user_id",user.id).maybeSingle();

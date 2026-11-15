@@ -18,6 +18,17 @@
 
 `admin.html`, `admin.js` and `config.js` are sent with `no-store`. The repository also sends a Content-Security-Policy-Report-Only header so browser violations can be fixed before enforcement. The site no longer depends on the Tailwind CDN (layout CSS is in `style.css`); the admin page still loads supabase-js from a pinned, SRI-checked URL.
 
+## Troubleshooting Turnstile
+
+If the widget shows "Unable to connect to website" or sign-in stalls:
+
+1. **Widget hostname list** (Cloudflare Turnstile dashboard) must include `samaritan.agro.okirorinnocent.tech` and `okirorinnocent.tech`.
+2. **Site key** in `config.js` (`TURNSTILE_SITE_KEY`) is copied exactly — no extra spaces or quotes.
+3. **Test in incognito/private window** with no extensions/VPN; ad-blockers and privacy tools often block `challenges.cloudflare.com`.
+4. **Supabase > Authentication > Attack Protection** must have **Cloudflare Turnstile enabled** with the secret key saved there (never in the repo).
+
+If using a second-level subdomain (`samaritan.agro.okirorinnocent.tech`), Cloudflare Universal SSL covers only the root and first-level subdomains by default. A first-level name such as `agro.okirorinnocent.tech` avoids this.
+
 ## Supabase hardening
 
 - Disable public sign-ups, require email confirmation, enable MFA for the administrator, and use a long unique password.
